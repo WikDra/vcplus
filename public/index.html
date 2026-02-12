@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VC+</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="screen active">
+    <div class="auth-container">
+      <div class="auth-logo">
+        <i class="fas fa-headset"></i>
+        <h1>VC+</h1>
+        <p>Połącz się ze znajomymi</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Logowanie</button>
+        <button class="auth-tab" data-tab="register">Rejestracja</button>
+      </div>
+      <form id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label>Nazwa użytkownika</label>
+          <input type="text" id="login-username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Hasło</label>
+          <input type="password" id="login-password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary">Zaloguj się</button>
+        <div id="login-error" class="form-error"></div>
+      </form>
+      <form id="register-form" class="auth-form">
+        <div class="form-group">
+          <label>Nazwa użytkownika</label>
+          <input type="text" id="reg-username" required minlength="3" maxlength="32" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Nazwa wyświetlana</label>
+          <input type="text" id="reg-display" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label>Email (opcjonalnie)</label>
+          <input type="email" id="reg-email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Hasło</label>
+          <input type="password" id="reg-password" required minlength="6" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-primary">Utwórz konto</button>
+        <div id="register-error" class="form-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app-screen" class="screen">
+    <!-- Mobile nav toggle -->
+    <button id="mobile-menu-btn" class="mobile-only">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Guild Sidebar -->
+    <nav id="guild-sidebar" class="guild-sidebar">
+      <div class="guild-list" id="guild-list">
+        <div class="guild-item home active" data-guild="home" title="Strona główna">
+          <i class="fas fa-home"></i>
+        </div>
+        <div class="guild-separator"></div>
+        <!-- dynamic guilds here -->
+      </div>
+      <div class="guild-item add-guild" id="add-guild-btn" title="Utwórz / Dołącz">
+        <i class="fas fa-plus"></i>
+      </div>
+    </nav>
+
+    <!-- Channel Sidebar -->
+    <aside id="channel-sidebar" class="channel-sidebar">
+      <div class="channel-header" id="channel-header">
+        <h2 id="guild-name-display">VC+</h2>
+        <button id="guild-settings-btn" class="icon-btn" title="Ustawienia serwera" style="display:none;">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+      <div class="channel-list" id="channel-list">
+        <!-- Home view -->
+        <div id="home-view" class="home-view">
+          <div class="home-section">
+            <div class="home-item" id="nav-friends"><i class="fas fa-user-friends"></i> Znajomi</div>
+            <div class="home-item" id="nav-streams"><i class="fas fa-broadcast-tower"></i> Streamy</div>
+            <div class="home-item" id="nav-settings"><i class="fas fa-cog"></i> Ustawienia</div>
+            <div class="home-item" id="nav-admin" style="display:none;"><i class="fas fa-shield-alt"></i> Panel Admina</div>
+          </div>
+        </div>
+      </div>
+      <!-- Voice status bar -->
+      <div id="voice-status-bar" class="voice-status-bar" style="display:none;">
+        <div class="voice-status-info">
+          <div class="voice-status-label"><i class="fas fa-signal"></i> <span id="voice-channel-name">Głosowy</span></div>
+          <div class="voice-status-sub" id="voice-latency">Połączono</div>
+        </div>
+        <div class="voice-status-actions">
+          <button id="voice-mute-btn" class="icon-btn" title="Wycisz mikrofon"><i class="fas fa-microphone"></i></button>
+          <button id="voice-deaf-btn" class="icon-btn" title="Wycisz dźwięk"><i class="fas fa-headphones"></i></button>
+          <button id="voice-screen-btn" class="icon-btn" title="Udostępnij ekran"><i class="fas fa-desktop"></i></button>
+          <button id="voice-disconnect-btn" class="icon-btn danger" title="Rozłącz"><i class="fas fa-phone-slash"></i></button>
+        </div>
+      </div>
+      <!-- User bar -->
+      <div class="user-bar">
+        <div class="user-bar-avatar" id="user-avatar-small">
+          <div class="avatar-circle"><i class="fas fa-user"></i></div>
+          <span class="status-dot online"></span>
+        </div>
+        <div class="user-bar-info">
+          <span class="user-bar-name" id="user-display-name">User</span>
+          <span class="user-bar-tag" id="user-tag">@user</span>
+        </div>
+        <div class="user-bar-actions">
+          <button id="audio-settings-btn" class="icon-btn" title="Ustawienia audio"><i class="fas fa-sliders-h"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+      <!-- Chat view -->
+      <div id="view-chat" class="view active">
+        <div class="chat-header">
+          <span class="chat-header-icon"><i class="fas fa-hashtag"></i></span>
+          <span class="chat-header-name" id="chat-channel-name">ogólny</span>
+          <div class="chat-header-actions">
+            <button id="toggle-members-btn" class="icon-btn" title="Lista członków"><i class="fas fa-users"></i></button>
+            <button id="toggle-audio-panel" class="icon-btn" title="Mixer audio"><i class="fas fa-music"></i></button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome" id="chat-welcome">
+            <h2>Witaj na kanale <span id="welcome-channel-name">#ogólny</span></h2>
+            <p>To jest początek tego kanału.</p>
+          </div>
+        </div>
+        <div class="chat-typing" id="chat-typing"></div>
+        <div class="chat-input-wrapper">
+          <form id="chat-form" class="chat-input-form">
+            <button type="button" class="chat-input-btn" id="chat-attach-btn"><i class="fas fa-plus-circle"></i></button>
+            <input type="text" id="chat-input" placeholder="Napisz wiadomość..." autocomplete="off">
+            <button type="submit" class="chat-input-btn"><i class="fas fa-paper-plane"></i></button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Home / Welcome view -->
+      <div id="view-home" class="view">
+        <div class="home-content">
+          <div class="home-hero">
+            <i class="fas fa-headset"></i>
+            <h1>Witaj w VC+</h1>
+            <p>Wybierz serwer z listy lub utwórz nowy.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings view -->
+      <div id="view-settings" class="view">
+        <div class="settings-container">
+          <h2><i class="fas fa-cog"></i> Ustawienia</h2>
+          <div class="settings-section">
+            <h3>Profil</h3>
+            <div class="form-group">
+              <label>Nazwa wyświetlana</label>
+              <input type="text" id="settings-display-name">
+            </div>
+            <button class="btn btn-primary" id="save-profile-btn">Zapisz profil</button>
+          </div>
+          <div class="settings-section">
+            <h3>Streaming</h3>
+            <div class="form-group">
+              <label>Twój klucz streamu (dla OBS)</label>
+              <div class="stream-key-display">
+                <input type="text" id="stream-key-input" readonly>
+                <button class="btn btn-sm" id="copy-stream-key"><i class="fas fa-copy"></i></button>
+                <button class="btn btn-sm btn-danger" id="regen-stream-key"><i class="fas fa-sync"></i></button>
+              </div>
+              <p class="form-help">Adres serwera RTMP: <code>rtmp://TWOJ_ADRES:1935/live</code></p>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Przetwarzanie audio</h3>
+            <div class="form-group">
+              <label><input type="checkbox" id="setting-noise-suppression" checked> Odszumianie (RNNoise)</label>
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" id="setting-keyboard-filter" checked> Wycinanie stuków klawiatury</label>
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" id="setting-echo-cancel" checked> Echo cancellation</label>
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" id="setting-auto-gain" checked> Auto gain control</label>
+            </div>
+            <div class="form-group">
+              <label>Próg bramki szumów (dB)</label>
+              <input type="range" id="setting-noise-gate" min="-100" max="0" value="-50">
+              <span id="noise-gate-value">-50 dB</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Urządzenia audio</h3>
+            <div class="form-group">
+              <label>Mikrofon</label>
+              <select id="setting-mic-device"></select>
+            </div>
+            <div class="form-group">
+              <label>Wyjście audio</label>
+              <select id="setting-speaker-device"></select>
+            </div>
+            <button class="btn btn-primary" id="test-audio-btn"><i class="fas fa-volume-up"></i> Testuj audio</button>
+          </div>
+          <div class="settings-section">
+            <button class="btn btn-danger" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Wyloguj się</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin view -->
+      <div id="view-admin" class="view">
+        <div class="admin-container">
+          <h2><i class="fas fa-shield-alt"></i> Panel Administratora</h2>
+          <div class="admin-stats" id="admin-stats">
+            <div class="stat-card"><div class="stat-number" id="stat-users">0</div><div class="stat-label">Użytkownicy</div></div>
+            <div class="stat-card"><div class="stat-number" id="stat-guilds">0</div><div class="stat-label">Serwery</div></div>
+            <div class="stat-card"><div class="stat-number" id="stat-messages">0</div><div class="stat-label">Wiadomości</div></div>
+            <div class="stat-card"><div class="stat-number" id="stat-online">0</div><div class="stat-label">Online</div></div>
+          </div>
+          <div class="admin-section">
+            <h3>Użytkownicy</h3>
+            <div class="admin-table-wrapper">
+              <table class="admin-table" id="admin-users-table">
+                <thead><tr><th>Użytkownik</th><th>Email</th><th>Status</th><th>Admin</th><th>Akcje</th></tr></thead>
+                <tbody id="admin-users-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-section">
+            <h3>Serwery</h3>
+            <div class="admin-table-wrapper">
+              <table class="admin-table" id="admin-guilds-table">
+                <thead><tr><th>Nazwa</th><th>Właściciel</th><th>Członkowie</th><th>Kod</th><th>Akcje</th></tr></thead>
+                <tbody id="admin-guilds-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stream view -->
+      <div id="view-stream" class="view">
+        <div class="stream-container">
+          <div class="stream-video-wrapper">
+            <video id="stream-video" autoplay playsinline></video>
+            <div class="stream-overlay" id="stream-overlay">
+              <div class="stream-info">
+                <button id="stream-back-btn" class="btn btn-sm" style="background:rgba(0,0,0,.6); border:none; color:#fff; margin-right:8px; cursor:pointer;" title="Wróć (Esc)">
+                  <i class="fas fa-arrow-left"></i> Wróć
+                </button>
+                <span class="stream-live-badge"><i class="fas fa-circle"></i> LIVE</span>
+                <span class="stream-title" id="stream-title">Stream</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Members Sidebar -->
+    <aside id="members-sidebar" class="members-sidebar">
+      <div class="members-header"><h3>Członkowie</h3></div>
+      <div class="members-list" id="members-list"></div>
+    </aside>
+
+    <!-- Audio Mixer Panel -->
+    <div id="audio-mixer-panel" class="audio-mixer-panel" style="display:none;">
+      <div class="mixer-header">
+        <h3><i class="fas fa-sliders-h"></i> Mixer Audio</h3>
+        <button class="icon-btn" id="close-mixer"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="mixer-content" id="mixer-content">
+        <div class="mixer-channel">
+          <label>Master</label>
+          <input type="range" id="mixer-master" min="0" max="150" value="100">
+          <span class="mixer-value">100%</span>
+        </div>
+        <div id="mixer-users"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Visualizer Debug Panel -->
+  <div id="audio-visualizer-panel" class="audio-visualizer-panel" style="display:none;"></div>
+
+  <!-- Toggle button for audio visualizer -->
+  <button id="av-toggle-btn" class="av-toggle-btn" title="Debug audio (przed/po przetworzeniu)">
+    <i class="fas fa-wave-square"></i>
+  </button>
+
+  <!-- Modals -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none;">
+    <div class="modal" id="modal-content">
+      <!-- dynamic modal content -->
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/audio-processor.js"></script>
+  <script src="/js/voice.js"></script>
+  <script src="/js/streaming.js"></script>
+  <script src="/js/audio-visualizer.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
